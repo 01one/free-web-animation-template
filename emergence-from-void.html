@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        .main-content, .navbar {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .emergence-from-void {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000005;
+            z-index: 9999;
+            perspective: 1200px;
+        }
+        
+        .emergence-from-void::before,
+        .emergence-from-void::after {
+            content: '';
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(ellipse at center, rgba(100, 120, 255, 0.2) 0%, rgba(0,0,5,0) 60%);
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+        
+        .emergence-from-void::after {
+            background: radial-gradient(ellipse at center, rgba(255, 120, 180, 0.15) 0%, rgba(0,0,5,0) 55%);
+        }
+
+        .particle-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 1px;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        .particle {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #fff, 0 0 12px #aaccff, 0 0 16px #78b4ff;
+            will-change: transform, opacity;
+        }
+        
+
+        .particle.p-small {
+            width: 1px;
+            height: 1px;
+        }
+        .particle.p-medium {
+            width: 3px;
+            height: 3px;
+        }
+
+        .final-logo-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.5);
+            will-change: opacity, transform;
+        }
+        
+        .central-flash {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 50px 25px #fff, 0 0 100px 50px #aaccff;
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        .final-logo-container img {
+            width: 150px;
+            filter: drop-shadow(0 0 20px rgba(200, 220, 255, 0.9));
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+
+
+    <div class="emergence-from-void" id="voidAndSomething">
+        <div class="particle-container" id="particleContainer"></div>
+        <div class="final-logo-container" id="finalLogoContainer">
+            <div class="central-flash" id="centralFlash"></div>
+            <img src="data/images/owl.png" alt="User Profile Picture">
+        </div>
+    </div>
+
+   
+<div class="main-content">
+
+Applicaiton content will appear here
+
+</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            const animationContainer = document.getElementById('voidAndSomething');
+            const particleContainer = document.getElementById('particleContainer');
+            const finalLogo = document.getElementById('finalLogoContainer');
+            const centralFlash = document.getElementById('centralFlash');
+            const mainContent = document.querySelector('.main-content');
+            const navbar = document.querySelector('.navbar');
+
+            const particleCount = 400;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const rand = Math.random();
+                if (rand > 0.9) particle.classList.add('p-medium');
+                if (rand < 0.2) particle.classList.add('p-small');
+                particleContainer.appendChild(particle);
+            }
+
+            const particles = Array.from(particleContainer.children);
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    gsap.to(animationContainer, {
+                        opacity: 0,
+                        duration: 1,
+                        ease: 'power2.inOut',
+                        onComplete: () => animationContainer.style.display = 'none'
+                    });
+                    gsap.to([mainContent, navbar], {
+                        visibility: 'visible',
+                        opacity: 1,
+                        duration: 1.5,
+                        ease: 'power2.out'
+                    });
+                }
+            });
+            
+            tl.set(particles, {
+                x: 0, y: 0, z: 0, opacity: 0
+            })
+            .to(particles, {
+                duration: 2,
+                opacity: () => gsap.utils.random(0.3, 1),
+                x: () => gsap.utils.random(-1000, 1000),
+                y: () => gsap.utils.random(-1000, 1000),
+                z: () => gsap.utils.random(-1500, 1500),
+                ease: 'power2.out',
+                stagger: { each: 0.005, from: 'center' }
+            })
+            .to(animationContainer.children, { 
+                opacity: 1,
+                duration: 2,
+                ease: 'power2.inOut'
+            }, "<");
+
+     
+            tl.to(particleContainer, {
+                duration: 3,
+                rotationZ: -45,
+                rotationY: 720,
+                scale: 0.5,
+                ease: 'power3.inOut'
+            }, "-=1.5");
+            
+            tl.to(particles, {
+                duration: 3,
+                z: 0,
+                ease: 'power3.in'
+            }, "<");
+
+            tl.to(particles, {
+                duration: 1,
+                opacity: 0,
+                ease: 'power1.in'
+            }, "-=0.5");
+
+            tl.to(centralFlash, {
+                duration: 0.5,
+                opacity: 1,
+                scale: 1,
+                ease: 'power2.out'
+            }, "-=0.8");
+            
+
+            tl.to(finalLogo, {
+                duration: 1.5,
+                opacity: 1,
+                scale: 1,
+                ease: 'back.out(1.7)'
+            }, "-=0.5");
+
+            tl.to(centralFlash, {
+                duration: 1,
+
+                scale: 50, 
+                ease: 'power2.in'
+            }, "<");
+
+        });
+    </script>
+</body>
+</html>
